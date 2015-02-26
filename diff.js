@@ -9,6 +9,7 @@ function check(oldVal, newVal) {
 
 
 assert = function(message,assertion) {
+  (assert.counter === undefined) ? assert.counter = 1 : assert.counter++
   if ( !assertion() ) {
    throw( new Error("test failed: " + message) )
   }
@@ -59,4 +60,4 @@ assertAllTypes()
 
 
 
-console.log('all tests passed')
+console.log(assert.counter + ' tests passed')
