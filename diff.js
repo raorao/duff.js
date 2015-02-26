@@ -1,6 +1,7 @@
 
 
-var duff = function(oldVal,newVal) {
+var duff = function(oldVal,newVal,options) {
+  var _returnErrors = false
 
   var _isObject = function(val) {
     return val && typeof(val) === 'object'
@@ -37,6 +38,12 @@ var duff = function(oldVal,newVal) {
     return oldVal === newVal
   }
 
+  var _setOptions = function(options) {
+    if(!options) { return }
+
+    _returnErrors = options.errors || false
+  }
+
   var _check = function (oldVal, newVal) {
     if(_isNaN(oldVal)) { return _isNaN(newVal) };
 
@@ -49,7 +56,19 @@ var duff = function(oldVal,newVal) {
     return _checkPrimitiveValues(oldVal,newVal)
   };
 
-  return _check(oldVal,newVal);
+
+  _constructResult = function() {
+    var result = _check(oldVal,newVal,options)
+    if (_returnErrors) {
+      var errorLength = result ? 0 : 1
+      return { errors: new Array(errorLength)}
+    } else {
+      return result
+    }
+  }
+
+  _setOptions(options)
+  return _constructResult();
 };
 
 
@@ -80,7 +99,7 @@ var duff = function(oldVal,newVal) {
   types.forEach(function(oldVal,oldValIndex) {
     types.forEach(function(newVal,newValIndex) {
       var actual   = duff(oldVal,newVal)
-      var expected = oldValIndex === newValIndex ? true : false
+      var expected = oldValIndex === newValIndex
       var message  = "expected duff(" + oldVal + "," + newVal + ") to return " + expected
       assert(message,function() { return actual === expected })
     })
@@ -125,6 +144,19 @@ var duff = function(oldVal,newVal) {
   assert('handles nested non-equivalent objects', function() {
     return duff({a: {b: 1}}, {a: {b: 2}}) == false
   })
+
+  // handles errors flag
+
+  types.forEach(function(oldVal,oldValIndex) {
+    types.forEach(function(newVal,newValIndex) {
+      var actual        = duff(oldVal,newVal, {errors: true})
+      var expectedCount = oldValIndex === newValIndex ? 0 : 1
+
+      var message  = "expected duff(" + oldVal + "," + newVal + ") to have " + expectedCount + " errors."
+      assert(message,function() { return actual.errors.length === expectedCount })
+    })
+  })
+
 
 
   console.log(assert.counter + ' tests passed')
