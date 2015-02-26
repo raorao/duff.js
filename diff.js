@@ -3,6 +3,16 @@ function check(oldVal, newVal) {
     return typeof(newVal) === 'number' && isNaN(newVal);
   };
 
+  if(oldVal && typeof(oldVal) === 'object' ) {
+    if(!newVal || typeof(newVal) !== 'object') { return false }
+    if((oldVal instanceof Array) !== (newVal instanceof Array) ) { return false }
+
+    for (key in oldVal) {
+      if(!check(oldVal[key], newVal[key])) { return false }
+    }
+    return true
+  }
+
   return oldVal === newVal
 };
 
@@ -52,6 +62,10 @@ function check(oldVal, newVal) {
 
   assert('check handles nonequivalent floats', function() {
     return check(1.1, 1.2) === false
+  });
+
+  assert('handles equivalent arrays', function() {
+    return check([1],[1])
   });
 
   console.log(assert.counter + ' tests passed')
