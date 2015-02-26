@@ -27,7 +27,10 @@ function check(oldVal, newVal) {
     undefined,
     Infinity,
     -Infinity,
-    NaN
+    NaN,
+    {},
+    [],
+    ''
   ]
 
   types.forEach(function(oldVal,oldValIndex) {
