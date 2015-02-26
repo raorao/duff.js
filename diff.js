@@ -4,34 +4,19 @@ function check(oldVal, newVal) {
   };
 
   return oldVal === newVal
-}
+};
 
 
 
-assert = function(message,assertion) {
-  (assert.counter === undefined) ? assert.counter = 1 : assert.counter++
-  if ( !assertion() ) {
-   throw( new Error("test failed: " + message) )
-  }
-}
 
-assert('check handles strings', function() {
-  return check('str', 'str1') === false
-})
 
-assert('check handles integers', function() {
-  return check(1, 2) === false
-})
-
-assert('check handles boolean values', function() {
-  return check(true, false) === false
-})
-
-assert('check handles floats', function() {
-  return check(1.1, 1.2) === false
-})
-
-assertAllTypes = function() {
+(function() {
+  var assert = function(message,assertion) {
+    (assert.counter === undefined) ? assert.counter = 1 : assert.counter++
+    if ( !assertion() ) {
+     throw( new Error("test failed: " + message) )
+    }
+  };
   var types = [
     0,
     1,
@@ -53,11 +38,19 @@ assertAllTypes = function() {
       assert(message,function() { return actual === expected })
     })
   })
-}
 
-assertAllTypes()
+  assert('check handles nonequivalent strings', function() {
+    return check('str', 'str1') === false
+  });
 
+  assert('check handles nonequivalent integers', function() {
+    return check(1, 2) === false
+  });
 
+  assert('check handles nonequivalent floats', function() {
+    return check(1.1, 1.2) === false
+  });
 
+  console.log(assert.counter + ' tests passed')
+})()
 
-console.log(assert.counter + ' tests passed')
