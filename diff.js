@@ -6,6 +6,7 @@ function check(oldVal, newVal) {
   if(oldVal && typeof(oldVal) === 'object' ) {
     if(!newVal || typeof(newVal) !== 'object') { return false }
     if((oldVal instanceof Array) !== (newVal instanceof Array) ) { return false }
+    if(oldVal.length !==  newVal.length) { return false }
 
     for (key in oldVal) {
       if(!check(oldVal[key], newVal[key])) { return false }
@@ -67,6 +68,18 @@ function check(oldVal, newVal) {
   assert('handles equivalent arrays', function() {
     return check([1],[1])
   });
+
+  assert('handles arrays of different lengths', function() {
+    return check([1],[1,2]) === false && check([1,2],[1]) === false
+  });
+
+  assert('handles arrays with all types of elements', function() {
+    return check(types,types)
+  })
+
+  assert('handles equivalent objects', function() {
+    return check({a: 1}, {a: 1})
+  })
 
   console.log(assert.counter + ' tests passed')
 })()
