@@ -99,11 +99,16 @@ function check(oldVal, newVal) {
   })
 
   assert('handles objects with distinct keys', function() {
-    return check({a: 1}, {a: 1, b: 2}) === false
+    return check({a: 1}, {a: 1, b: 2}) === false && check({a: 1, b: 2}, {a: 1}) === false
   })
 
+  assert('handles nested equivalent objects', function() {
+    return check({a: {b: 1}}, {a: {b: 1}})
+  })
 
+  assert('handles nested non-equivalent objects', function() {
+    return check({a: {b: 1}}, {a: {b: 2}}) == false
+  })
 
   console.log(assert.counter + ' tests passed')
-})()
-
+})();
