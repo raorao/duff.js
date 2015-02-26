@@ -1,3 +1,14 @@
+function checkKeys(oldVal,newVal) {
+  var oldKeys = Object.keys(oldVal)
+  var newKeys = Object.keys(newVal)
+  if(oldKeys.length !== newKeys.length) { return false }
+  oldKeys.forEach(function(oldKey,index) {
+    if(!check(oldKey, newKeys[index])) { return false }
+  })
+
+  return true
+}
+
 function check(oldVal, newVal) {
   if(typeof(oldVal) === 'number' && isNaN(oldVal)) {
     return typeof(newVal) === 'number' && isNaN(newVal);
@@ -6,7 +17,8 @@ function check(oldVal, newVal) {
   if(oldVal && typeof(oldVal) === 'object' ) {
     if(!newVal || typeof(newVal) !== 'object') { return false }
     if((oldVal instanceof Array) !== (newVal instanceof Array) ) { return false }
-    if(oldVal.length !==  newVal.length) { return false }
+    if(!checkKeys(oldVal,newVal)) { return false }
+
 
     for (key in oldVal) {
       if(!check(oldVal[key], newVal[key])) { return false }
@@ -80,6 +92,12 @@ function check(oldVal, newVal) {
   assert('handles equivalent objects', function() {
     return check({a: 1}, {a: 1})
   })
+
+  assert('handles objects with distinct keys', function() {
+    return check({a: 1}, {a: 1, b: 2}) === false
+  })
+
+
 
   console.log(assert.counter + ' tests passed')
 })()
