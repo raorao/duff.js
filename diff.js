@@ -1,40 +1,45 @@
-function checkIfArrays(oldVal,newVal) {
-  return (oldVal instanceof Array) === (newVal instanceof Array)
-}
 
-function isObject(val) {
-  return val && typeof(val) === 'object'
-}
 
-function checkKeys(oldVal,newVal) {
-  var oldKeys = Object.keys(oldVal)
-  var newKeys = Object.keys(newVal)
-  if(oldKeys.length !== newKeys.length) { return false }
-  oldKeys.forEach(function(oldKey,index) {
-    if(!check(oldKey, newKeys[index])) { return false }
-  })
+var check = function(oldVal,newVal) {
 
-  return true
-}
+  var checkIfArrays = function(oldVal,newVal) {
+    return (oldVal instanceof Array) === (newVal instanceof Array)
+  }
 
-function check(oldVal, newVal) {
-  if(typeof(oldVal) === 'number' && isNaN(oldVal)) {
-    return typeof(newVal) === 'number' && isNaN(newVal);
-  };
+  var isObject = function(val) {
+    return val && typeof(val) === 'object'
+  }
 
-  if(isObject(oldVal)) {
-    if(!isObject(newVal) || !checkIfArrays(oldVal,newVal) || !checkKeys(oldVal,newVal) ) { return false }
+  var checkKeys = function(oldVal,newVal) {
+    var oldKeys = Object.keys(oldVal)
+    var newKeys = Object.keys(newVal)
+    if(oldKeys.length !== newKeys.length) { return false }
+    oldKeys.forEach(function(oldKey,index) {
+      if(!check(oldKey, newKeys[index])) { return false }
+    })
 
-    for (key in oldVal) {
-      if(!check(oldVal[key], newVal[key])) { return false }
-    }
     return true
   }
 
-  return oldVal === newVal
+  var check = function (oldVal, newVal) {
+    if(typeof(oldVal) === 'number' && isNaN(oldVal)) {
+      return typeof(newVal) === 'number' && isNaN(newVal);
+    };
+
+    if(isObject(oldVal)) {
+      if(!isObject(newVal) || !checkIfArrays(oldVal,newVal) || !checkKeys(oldVal,newVal) ) { return false }
+
+      for (key in oldVal) {
+        if(!check(oldVal[key], newVal[key])) { return false }
+      }
+      return true
+    }
+
+    return oldVal === newVal
+  };
+
+  return check(oldVal,newVal);
 };
-
-
 
 
 
