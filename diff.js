@@ -12,22 +12,32 @@ var duff = function(oldVal,newVal,options) {
     return typeof(val) === 'number' && isNaN(val)
   }
 
-  var _checkNaN = function(oldVal,newVal) {
-    var result = _isNaN(newVal)
+  var _createErrorMessage = function(oldVal,newVal) {
+    return "Expected target object to equal " + oldVal + ". Instead, it was set to " + newVal + "."
+  }
+
+  var _checkType = function(oldVal,newVal,areEqual) {
+    var result = areEqual()
     if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal) ) }
     return result
+  }
+
+  var _checkNaN = function(oldVal,newVal) {
+    return _checkType(oldVal,newVal, function() { return _isNaN(newVal) })
   }
 
   var _checkIfArrays = function(oldVal,newVal) {
-    var result = (oldVal instanceof Array) === (newVal instanceof Array)
-    if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal) ) }
-    return result
+    return _checkType(oldVal,newVal, function() {
+      return (oldVal instanceof Array) === (newVal instanceof Array)
+    })
   }
 
   var _checkIsObject = function(oldVal,newVal) {
-    var result = _isObject(newVal)
-    if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal) ) }
-    return result
+    return _checkType(oldVal,newVal, function() { return _isObject(newVal) })
+  }
+
+  var _checkPrimitiveValues = function(oldVal,newVal) {
+    return _checkType(oldVal,newVal, function() { return oldVal === newVal })
   }
 
   var _checkObjectKeys = function(oldVal,newVal) {
@@ -47,16 +57,6 @@ var duff = function(oldVal,newVal,options) {
     }
 
     return true
-  }
-
-  var _checkPrimitiveValues = function(oldVal,newVal) {
-    var result = oldVal === newVal
-    if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal) ) }
-    return result
-  }
-
-  var _createErrorMessage = function(oldVal,newVal) {
-    return "Expected target object to equal " + oldVal + ". Instead, it was set to " + newVal + "."
   }
 
   var _setOptions = function(options) {
