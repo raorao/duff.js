@@ -61,7 +61,7 @@ var duff = function(oldVal,newVal,options) {
     var result = _check(oldVal,newVal,options)
     if (_returnErrors) {
       var errorLength = result ? 0 : 1
-      return { errors: new Array(errorLength)}
+      return { errors: new Array(errorLength), value: result}
     } else {
       return result
     }
@@ -151,9 +151,14 @@ var duff = function(oldVal,newVal,options) {
     types.forEach(function(newVal,newValIndex) {
       var actual        = duff(oldVal,newVal, {errors: true})
       var expectedCount = oldValIndex === newValIndex ? 0 : 1
+      var expectedValue = oldValIndex === newValIndex
 
-      var message  = "expected duff(" + oldVal + "," + newVal + ") to have " + expectedCount + " errors."
-      assert(message,function() { return actual.errors.length === expectedCount })
+      var countMessage  = "expected duff(" + oldVal + "," + newVal + ") to have " + expectedCount + " errors."
+      var valueMessage  = "expected duff(" + oldVal + "," + newVal + ") to have value of " + expectedValue + "."
+
+      assert(countMessage,function() { return actual.errors.length === expectedCount })
+      assert(valueMessage,function() { return actual.value === expectedValue })
+
     })
   })
 
