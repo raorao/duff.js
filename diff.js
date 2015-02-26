@@ -16,28 +16,28 @@ var duff = function(oldVal,newVal,options) {
     return "Expected target object to equal " + oldVal + ". Instead, it was set to " + newVal + "."
   }
 
-  var _checkType = function(oldVal,newVal,areEqual) {
+  var _check = function(oldVal,newVal,areEqual) {
     var result = areEqual()
     if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal) ) }
     return result
   }
 
   var _checkNaN = function(oldVal,newVal) {
-    return _checkType(oldVal,newVal, function() { return _isNaN(newVal) })
+    return _check(oldVal,newVal, function() { return _isNaN(newVal) })
   }
 
   var _checkIfArrays = function(oldVal,newVal) {
-    return _checkType(oldVal,newVal, function() {
+    return _check(oldVal,newVal, function() {
       return (oldVal instanceof Array) === (newVal instanceof Array)
     })
   }
 
   var _checkIsObject = function(oldVal,newVal) {
-    return _checkType(oldVal,newVal, function() { return _isObject(newVal) })
+    return _check(oldVal,newVal, function() { return _isObject(newVal) })
   }
 
   var _checkPrimitiveValues = function(oldVal,newVal) {
-    return _checkType(oldVal,newVal, function() { return oldVal === newVal })
+    return _check(oldVal,newVal, function() { return oldVal === newVal })
   }
 
   var _checkObjectKeys = function(oldVal,newVal) {
@@ -45,7 +45,7 @@ var duff = function(oldVal,newVal,options) {
     var newKeys = Object.keys(newVal)
     if(oldKeys.length !== newKeys.length) { return false }
     oldKeys.forEach(function(oldKey,index) {
-      if(!_check(oldKey, newKeys[index])) { return false }
+      if(!_duff(oldKey, newKeys[index])) { return false }
     })
 
     return true
@@ -53,7 +53,7 @@ var duff = function(oldVal,newVal,options) {
 
   var _checkObjectValues = function(oldObj,newObj) {
     for (key in oldObj) {
-      if(!_check(oldObj[key], newObj[key])) { return false }
+      if(!_duff(oldObj[key], newObj[key])) { return false }
     }
 
     return true
@@ -65,7 +65,7 @@ var duff = function(oldVal,newVal,options) {
     _returnErrors = options.errors || false
   }
 
-  var _check = function (oldVal, newVal) {
+  var _duff = function (oldVal, newVal) {
     if(_isNaN(oldVal)) { return _checkNaN(oldVal,newVal) };
 
     if(_isObject(oldVal)) {
@@ -79,7 +79,7 @@ var duff = function(oldVal,newVal,options) {
 
 
   _constructResult = function() {
-    var result = _check(oldVal,newVal,options)
+    var result = _duff(oldVal,newVal,options)
     if (_returnErrors) {
       return { errors: _errors, value: result}
     } else {
