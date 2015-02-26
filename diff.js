@@ -2,6 +2,7 @@
 
 var duff = function(oldVal,newVal,options) {
   var _returnErrors = false
+  var _errors = []
 
   var _isObject = function(val) {
     return val && typeof(val) === 'object'
@@ -11,8 +12,22 @@ var duff = function(oldVal,newVal,options) {
     return typeof(val) === 'number' && isNaN(val)
   }
 
+  var _checkNaN = function(oldVal,newVal) {
+    var result = _isNaN(newVal)
+    if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal) ) }
+    return result
+  }
+
   var _checkIfArrays = function(oldVal,newVal) {
-    return (oldVal instanceof Array) === (newVal instanceof Array)
+    var result = (oldVal instanceof Array) === (newVal instanceof Array)
+    if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal) ) }
+    return result
+  }
+
+  var _checkIsObject = function(oldVal,newVal) {
+    var result = _isObject(newVal)
+    if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal) ) }
+    return result
   }
 
   var _checkObjectKeys = function(oldVal,newVal) {
@@ -35,7 +50,13 @@ var duff = function(oldVal,newVal,options) {
   }
 
   var _checkPrimitiveValues = function(oldVal,newVal) {
-    return oldVal === newVal
+    var result = oldVal === newVal
+    if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal) ) }
+    return result
+  }
+
+  var _createErrorMessage = function(oldVal,newVal) {
+    return "Expected target object to equal " + oldVal + ". Instead, it was set to " + newVal + "."
   }
 
   var _setOptions = function(options) {
@@ -45,10 +66,10 @@ var duff = function(oldVal,newVal,options) {
   }
 
   var _check = function (oldVal, newVal) {
-    if(_isNaN(oldVal)) { return _isNaN(newVal) };
+    if(_isNaN(oldVal)) { return _checkNaN(oldVal,newVal) };
 
     if(_isObject(oldVal)) {
-      if(!_isObject(newVal) || !_checkIfArrays(oldVal,newVal) || !_checkObjectKeys(oldVal,newVal) ) { return false }
+      if( !_checkIsObject(oldVal,newVal) || !_checkIfArrays(oldVal,newVal) || !_checkObjectKeys(oldVal,newVal) ) { return false }
 
       return _checkObjectValues(oldVal,newVal)
     }
@@ -60,8 +81,7 @@ var duff = function(oldVal,newVal,options) {
   _constructResult = function() {
     var result = _check(oldVal,newVal,options)
     if (_returnErrors) {
-      var errorLength = result ? 0 : 1
-      return { errors: new Array(errorLength), value: result}
+      return { errors: _errors, value: result}
     } else {
       return result
     }
@@ -149,15 +169,26 @@ var duff = function(oldVal,newVal,options) {
 
   types.forEach(function(oldVal,oldValIndex) {
     types.forEach(function(newVal,newValIndex) {
-      var actual        = duff(oldVal,newVal, {errors: true})
-      var expectedCount = oldValIndex === newValIndex ? 0 : 1
-      var expectedValue = oldValIndex === newValIndex
+      var actual = duff(oldVal,newVal, {errors: true});
 
-      var countMessage  = "expected duff(" + oldVal + "," + newVal + ") to have " + expectedCount + " errors."
-      var valueMessage  = "expected duff(" + oldVal + "," + newVal + ") to have value of " + expectedValue + "."
+      (function foo() {
+        var expectedCount = oldValIndex === newValIndex ? 0 : 1
+        var message = "expected duff(" + oldVal + "," + newVal + ") to have " + expectedCount + " errors."
+        assert(message,function() { return actual.errors.length === expectedCount })
+      })();
 
-      assert(countMessage,function() { return actual.errors.length === expectedCount })
-      assert(valueMessage,function() { return actual.value === expectedValue })
+      (function foo() {
+        var expectedValue = oldValIndex === newValIndex
+        var message = "expected duff(" + oldVal + "," + newVal + ") to have value of " + expectedValue + "."
+        assert(message,function() { return actual.value === expectedValue })
+      })();
+
+      if (oldValIndex !== newValIndex) {
+        var expectedErrorMessage = "Expected target object to equal " + oldVal + ". Instead, it was set to " + newVal + "."
+        var message = "expected duff(" + oldVal + "," + newVal + ") to have error message of " + expectedErrorMessage
+        assert(message,function() { return actual.errors[0] === expectedErrorMessage })
+      };
+
 
     })
   })
