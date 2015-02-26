@@ -1,36 +1,36 @@
 
 
-var check = function(oldVal,newVal) {
+var duff = function(oldVal,newVal) {
 
-  var checkIfArrays = function(oldVal,newVal) {
+  var _checkIfArrays = function(oldVal,newVal) {
     return (oldVal instanceof Array) === (newVal instanceof Array)
   }
 
-  var isObject = function(val) {
+  var _isObject = function(val) {
     return val && typeof(val) === 'object'
   }
 
-  var checkKeys = function(oldVal,newVal) {
+  var _checkKeys = function(oldVal,newVal) {
     var oldKeys = Object.keys(oldVal)
     var newKeys = Object.keys(newVal)
     if(oldKeys.length !== newKeys.length) { return false }
     oldKeys.forEach(function(oldKey,index) {
-      if(!check(oldKey, newKeys[index])) { return false }
+      if(!_check(oldKey, newKeys[index])) { return false }
     })
 
     return true
   }
 
-  var check = function (oldVal, newVal) {
+  var _check = function (oldVal, newVal) {
     if(typeof(oldVal) === 'number' && isNaN(oldVal)) {
       return typeof(newVal) === 'number' && isNaN(newVal);
     };
 
-    if(isObject(oldVal)) {
-      if(!isObject(newVal) || !checkIfArrays(oldVal,newVal) || !checkKeys(oldVal,newVal) ) { return false }
+    if(_isObject(oldVal)) {
+      if(!_isObject(newVal) || !_checkIfArrays(oldVal,newVal) || !_checkKeys(oldVal,newVal) ) { return false }
 
       for (key in oldVal) {
-        if(!check(oldVal[key], newVal[key])) { return false }
+        if(!_check(oldVal[key], newVal[key])) { return false }
       }
       return true
     }
@@ -38,7 +38,7 @@ var check = function(oldVal,newVal) {
     return oldVal === newVal
   };
 
-  return check(oldVal,newVal);
+  return _check(oldVal,newVal);
 };
 
 
@@ -68,52 +68,53 @@ var check = function(oldVal,newVal) {
 
   types.forEach(function(oldVal,oldValIndex) {
     types.forEach(function(newVal,newValIndex) {
-      var actual   = check(oldVal,newVal)
+      var actual   = duff(oldVal,newVal)
       var expected = oldValIndex === newValIndex ? true : false
-      var message  = "expected check(" + oldVal + "," + newVal + ") to return " + expected
+      var message  = "expected duff(" + oldVal + "," + newVal + ") to return " + expected
       assert(message,function() { return actual === expected })
     })
   })
 
-  assert('check handles nonequivalent strings', function() {
-    return check('str', 'str1') === false
+  assert('duff handles nonequivalent strings', function() {
+    return duff('str', 'str1') === false
   });
 
-  assert('check handles nonequivalent integers', function() {
-    return check(1, 2) === false
+  assert('duff handles nonequivalent integers', function() {
+    return duff(1, 2) === false
   });
 
-  assert('check handles nonequivalent floats', function() {
-    return check(1.1, 1.2) === false
+  assert('duff handles nonequivalent floats', function() {
+    return duff(1.1, 1.2) === false
   });
 
   assert('handles equivalent arrays', function() {
-    return check([1],[1])
+    return duff([1],[1])
   });
 
-  assert('handles arrays of different lengths', function() {
-    return check([1],[1,2]) === false && check([1,2],[1]) === false
+  assert('handles arrays of dufferent lengths', function() {
+    return duff([1],[1,2]) === false && duff([1,2],[1]) === false
   });
 
   assert('handles arrays with all types of elements', function() {
-    return check(types,types)
+    return duff(types,types)
   })
 
   assert('handles equivalent objects', function() {
-    return check({a: 1}, {a: 1})
+    return duff({a: 1}, {a: 1})
   })
 
   assert('handles objects with distinct keys', function() {
-    return check({a: 1}, {a: 1, b: 2}) === false && check({a: 1, b: 2}, {a: 1}) === false
+    return duff({a: 1}, {a: 1, b: 2}) === false && duff({a: 1, b: 2}, {a: 1}) === false
   })
 
   assert('handles nested equivalent objects', function() {
-    return check({a: {b: 1}}, {a: {b: 1}})
+    return duff({a: {b: 1}}, {a: {b: 1}})
   })
 
   assert('handles nested non-equivalent objects', function() {
-    return check({a: {b: 1}}, {a: {b: 2}}) == false
+    return duff({a: {b: 1}}, {a: {b: 2}}) == false
   })
+
 
   console.log(assert.counter + ' tests passed')
 })();
