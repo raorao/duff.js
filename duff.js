@@ -1,5 +1,3 @@
-
-
 var duff = function(oldVal,newVal,options) {
   var _returnErrors = false
   var _errors = []
@@ -151,6 +149,9 @@ var duff = function(oldVal,newVal,options) {
      throw( new Error("test failed: " + message) )
     }
   };
+  var xassert = function(message) {
+    console.log('The follow test has been marked as pending: ' + message)
+  }
   var types = [
     0,
     1,
@@ -234,30 +235,78 @@ var duff = function(oldVal,newVal,options) {
         assert(message,function() { return actual.value === expectedValue })
       })();
     })
-  })
+  });
 
-  assert('duff handles nonequivalent strings', function() {
+  assert('handles nonequivalent strings', function() {
     return duff('str', 'str1', {errors: true}).errors.length === 1
   });
 
-  assert('duff handles nonequivalent integers', function() {
+  assert('handles nonequivalent integers', function() {
     return duff(1, 2, {errors: true}).errors.length === 1
   });
 
-  assert('duff handles nonequivalent floats', function() {
+  assert('handles nonequivalent floats', function() {
     return duff(1.1, 1.2, {errors: true}).errors.length === 1
   });
 
-  assert('handles arrays of different lengths', function() {
-    return duff([1],[1,2], {errors: true}).errors.length === 1 && duff([1,2],[1], {errors: true}).errors.length === 1
+  assert('handles a target array with too many keys', function() {
+    return duff([1],[1,2], {errors: true}).errors.length === 1
   });
 
-  assert('handles objects with distinct keys', function() {
-    return duff({a: 1}, {a: 1, b: 2}, {errors: true}).errors.length === 1 && duff({a: 1, b: 2}, {a: 1}, {errors: true}).errors.length === 1
+  assert('handles a target array with too few keys', function() {
+    return duff([1,2],[1], {errors: true}).errors.length === 1
+  });
+
+  assert('handles a target array with muliple errors', function() {
+    return duff([1,2],[1,3,4], {errors: true}).errors.length === 2
   })
 
-  assert('handles nested non-equivalent objects', function() {
-    return duff({a: {b: 1}}, {a: {b: 2}}, {errors: true}).errors.length === 1
+  assert('handles a target object with an excess key', function() {
+    return duff({a:1},{a:1,b:2}, {errors: true}).errors.length === 1
+  });
+
+  assert('handles a target object missing a key', function() {
+    return duff({a:1,b:2},{a:1}, {errors: true}).errors.length === 1
+  });
+
+  assert('handles a target object with muliple errors', function() {
+    return duff({a:1,b:2},{a:1,b:3,c:3}, {errors: true}).errors.length === 2
+  });
+
+  assert('handles nested objects (integration-y)', function() {
+    var originalObject =
+      {
+        widgetIds: ['1','2','3'],
+        gadgets: [
+          { name: 'bar', use: 'gadgeting' },
+          { name: 'baz', use: 'ungadgeting'}
+        ],
+        type: 'foo'
+      }
+
+    var targetObject =
+      {
+        widgetIds: ['1','2','5','4'],
+        gadgets: [
+          { name: 'bar', use: 'gadgetizing' },
+          { name: 'baz', use: 'ungadgeting', bar: [1,2,3] }
+        ]
+      }
+
+    var expectedErrors =
+      [
+        'Expected target object to have key "type". No such key was found.',
+        'Expected target object ["widgetIds"] to not have key "3".',
+        'Expected target object ["widgetIds"]["2"] to equal "3". Instead, it was set to "5".',
+        'Expected target object ["gadgets"]["0"]["use"] to equal "gadgeting". Instead, it was set to "gadgetizing".',
+        'Expected target object ["gadgets"]["1"] to not have key "bar".'
+      ].sort()
+
+    var foo = duff(originalObject,targetObject,{errors: true}).errors.sort().every(function(actualError,index) {
+      return actualError === expectedErrors[index]
+    })
+
+    return foo
   })
 
   console.log(assert.counter + ' tests passed')
