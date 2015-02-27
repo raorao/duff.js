@@ -1,5 +1,3 @@
-
-
 var duff = function(oldVal,newVal,options) {
   var _returnErrors = false
   var _errors = []
@@ -237,17 +235,17 @@ var duff = function(oldVal,newVal,options) {
         assert(message,function() { return actual.value === expectedValue })
       })();
     })
-  })
+  });
 
-  assert('duff handles nonequivalent strings', function() {
+  assert('handles nonequivalent strings', function() {
     return duff('str', 'str1', {errors: true}).errors.length === 1
   });
 
-  assert('duff handles nonequivalent integers', function() {
+  assert('handles nonequivalent integers', function() {
     return duff(1, 2, {errors: true}).errors.length === 1
   });
 
-  assert('duff handles nonequivalent floats', function() {
+  assert('handles nonequivalent floats', function() {
     return duff(1.1, 1.2, {errors: true}).errors.length === 1
   });
 
