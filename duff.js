@@ -19,51 +19,59 @@ var duff = function(oldVal,newVal,options) {
     return val
   }
 
-  var _createErrorMessage = function(oldVal,newVal) {
-    return "Expected target object to equal " + _toString(oldVal) + ". Instead, it was set to " + _toString(newVal) + "."
+  var _createErrorMessage = function(oldVal,newVal,ancestors) {
+    var ancestorsString = ancestors.map(function(ancestor) {
+      return "[" + _toString(ancestor) + "]"
+    }).join('')
+    return "Expected target object " + ancestorsString + " to equal " + _toString(oldVal) + ". Instead, it was set to " + _toString(newVal) + "."
   }
 
-  var _check = function(oldVal,newVal,areEqual) {
+  var _check = function(oldVal,newVal,ancestors,areEqual) {
     var result = areEqual()
-    if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal) ) }
+    if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal,ancestors) ) }
     return result
   }
 
-  var _checkNaN = function(oldVal,newVal) {
-    return _check(oldVal,newVal, function() { return _isNaN(newVal) })
+  var _checkNaN = function(oldVal,newVal,ancestors) {
+    return _check(oldVal,newVal, ancestors, function() { return _isNaN(newVal) })
   }
 
-  var _checkIfArrays = function(oldVal,newVal) {
-    return _check(oldVal,newVal, function() {
+  var _checkIfArrays = function(oldVal,newVal,ancestors) {
+    return _check(oldVal,newVal, ancestors, function() {
       return (oldVal instanceof Array) === (newVal instanceof Array)
     })
   }
 
-  var _checkIsObject = function(oldVal,newVal) {
-    return _check(oldVal,newVal, function() { return _isObject(newVal) })
+  var _checkIsObject = function(oldVal,newVal,ancestors) {
+    return _check(oldVal,newVal,ancestors,function() { return _isObject(newVal) })
   }
 
-  var _checkPrimitiveValues = function(oldVal,newVal) {
-    return _check(oldVal,newVal, function() { return oldVal === newVal })
+  var _checkPrimitiveValues = function(oldVal,newVal,ancestors) {
+    return _check(oldVal,newVal, ancestors, function() { return oldVal === newVal })
   }
 
-  var _checkObjectKeys = function(oldVal,newVal) {
+  var _checkObjectKeys = function(oldVal,newVal,ancestors) {
     var oldKeys = Object.keys(oldVal)
     var newKeys = Object.keys(newVal)
-    if(oldKeys.length !== newKeys.length) { return false }
+    if(oldKeys.length !== newKeys.length) {
+      return _check(oldVal,newVal,ancestors,function() { return false})
+    }
     oldKeys.forEach(function(oldKey,index) {
-      if(!_duff(oldKey, newKeys[index])) { return false }
+      if(!_duff(oldKey, newKeys[index],ancestors)) { return false }
     })
 
     return true
   }
 
-  var _checkObjectValues = function(oldObj,newObj) {
+  var _checkObjectValues = function(oldObj,newObj,ancestors) {
+    var result = true
     for (key in oldObj) {
-      if(!_duff(oldObj[key], newObj[key])) { return false }
+      var newAncestors = ancestors.concat([key])
+      var localResult = _duff(oldObj[key], newObj[key],newAncestors)
+      result = result ? localResult : false
     }
 
-    return true
+    return result
   }
 
   var _setOptions = function(options) {
@@ -72,21 +80,21 @@ var duff = function(oldVal,newVal,options) {
     _returnErrors = options.errors || false
   }
 
-  var _duff = function (oldVal, newVal) {
-    if(_isNaN(oldVal)) { return _checkNaN(oldVal,newVal) };
+  var _duff = function (oldVal, newVal, ancestors) {
+    if(_isNaN(oldVal)) { return _checkNaN(oldVal,newVal,ancestors) };
 
     if(_isObject(oldVal)) {
-      if( !_checkIsObject(oldVal,newVal) || !_checkIfArrays(oldVal,newVal) || !_checkObjectKeys(oldVal,newVal) ) { return false }
+      if( !_checkIsObject(oldVal,newVal,ancestors) || !_checkIfArrays(oldVal,newVal,ancestors) || !_checkObjectKeys(oldVal,newVal,ancestors) ) { return false }
 
-      return _checkObjectValues(oldVal,newVal)
+      return _checkObjectValues(oldVal,newVal,ancestors)
     }
 
-    return _checkPrimitiveValues(oldVal,newVal)
+    return _checkPrimitiveValues(oldVal,newVal,ancestors)
   };
 
 
   _constructResult = function() {
-    var result = _duff(oldVal,newVal,options)
+    var result = _duff(oldVal,newVal,[])
     if (_returnErrors) {
       return { errors: _errors, value: result}
     } else {
