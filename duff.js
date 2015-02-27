@@ -249,16 +249,30 @@ var duff = function(oldVal,newVal,options) {
     return duff(1.1, 1.2, {errors: true}).errors.length === 1
   });
 
-  assert('handles arrays of different lengths', function() {
-    return duff([1],[1,2], {errors: true}).errors.length === 1 && duff([1,2],[1], {errors: true}).errors.length === 1
+  assert('handles a target array with too many keys', function() {
+    return duff([1],[1,2], {errors: true}).errors.length === 1
   });
 
-  assert('handles objects with distinct keys', function() {
-    return duff({a: 1}, {a: 1, b: 2}, {errors: true}).errors.length === 1 && duff({a: 1, b: 2}, {a: 1}, {errors: true}).errors.length === 1
+  assert('handles a target array with too few keys', function() {
+    return duff([1,2],[1], {errors: true}).errors.length === 1
+  });
+
+  assert('handles a target array with muliple errors', function() {
+    return duff([1,2],[1,3,4], {errors: true}).errors.length === 2
   })
 
-  assert('handles nested non-equivalent objects', function() {
-    return duff({a: {b: 1}}, {a: {b: 2}}, {errors: true}).errors.length === 1
+  assert('handles a target object with an excess key', function() {
+    return duff({a:1},{a:1,b:2}, {errors: true}).errors.length === 1
+  });
+
+  assert('handles a target object missing a key', function() {
+    return duff({a:1,b:2},{a:1}, {errors: true}).errors.length === 1
+  });
+
+  assert('handles a target object with muliple errors', function() {
+    return duff({a:1,b:2},{a:1,b:3,c:3}, {errors: true}).errors.length === 2
+  });
+
   })
 
   console.log(assert.counter + ' tests passed')
