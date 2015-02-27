@@ -170,58 +170,7 @@ var duff = function(oldVal,newVal,options) {
 
   types.forEach(function(oldVal,oldValIndex) {
     types.forEach(function(newVal,newValIndex) {
-      var actual   = duff(oldVal,newVal)
-      var expected = oldValIndex === newValIndex
-      var message  = "expected duff(" + oldVal + "," + newVal + ") to return " + expected
-      assert(message,function() { return actual === expected })
-    })
-  })
-
-  assert('duff handles nonequivalent strings', function() {
-    return duff('str', 'str1') === false
-  });
-
-  assert('duff handles nonequivalent integers', function() {
-    return duff(1, 2) === false
-  });
-
-  assert('duff handles nonequivalent floats', function() {
-    return duff(1.1, 1.2) === false
-  });
-
-  assert('handles equivalent arrays', function() {
-    return duff([1],[1])
-  });
-
-  assert('handles arrays of dufferent lengths', function() {
-    return duff([1],[1,2]) === false && duff([1,2],[1]) === false
-  });
-
-  assert('handles arrays with all types of elements', function() {
-    return duff(types,types)
-  })
-
-  assert('handles equivalent objects', function() {
-    return duff({a: 1}, {a: 1})
-  })
-
-  assert('handles objects with distinct keys', function() {
-    return duff({a: 1}, {a: 1, b: 2}) === false && duff({a: 1, b: 2}, {a: 1}) === false
-  })
-
-  assert('handles nested equivalent objects', function() {
-    return duff({a: {b: 1}}, {a: {b: 1}})
-  })
-
-  assert('handles nested non-equivalent objects', function() {
-    return duff({a: {b: 1}}, {a: {b: 2}}) === false
-  })
-
-  // handles errors flag
-
-  types.forEach(function(oldVal,oldValIndex) {
-    types.forEach(function(newVal,newValIndex) {
-      var actual = duff(oldVal,newVal, {errors: true});
+      var actual = duff(oldVal,newVal);
 
       (function foo() {
         var expectedCount = oldValIndex === newValIndex ? 0 : 1
@@ -238,47 +187,47 @@ var duff = function(oldVal,newVal,options) {
   });
 
   assert('handles nonequivalent strings', function() {
-    var actual = duff('str', 'str1', {errors: true})
+    var actual = duff('str', 'str1')
     return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles nonequivalent integers', function() {
-    var actual = duff(1, 2, {errors: true})
+    var actual = duff(1, 2)
     return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles nonequivalent floats', function() {
-    var actual = duff(1.1, 1.2, {errors: true})
+    var actual = duff(1.1, 1.2)
     return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles a target array with too many keys', function() {
-    var actual = duff([1],[1,2], {errors: true})
+    var actual = duff([1],[1,2])
     return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles a target array with too few keys', function() {
-    var actual = duff([1,2],[1], {errors: true})
+    var actual = duff([1,2],[1])
     return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles a target array with muliple errors', function() {
-    var actual = duff([1,2],[1,3,4], {errors: true})
+    var actual = duff([1,2],[1,3,4])
     return actual.value === false && actual.errors.length === 2
   })
 
   assert('handles a target object with an excess key', function() {
-    var actual = duff({a:1},{a:1,b:2}, {errors: true})
+    var actual = duff({a:1},{a:1,b:2})
     return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles a target object missing a key', function() {
-    var actual = duff({a:1,b:2},{a:1}, {errors: true})
+    var actual = duff({a:1,b:2},{a:1})
     return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles a target object with muliple errors', function() {
-    var actual = duff({a:1,b:2},{a:1,b:3,c:3}, {errors: true})
+    var actual = duff({a:1,b:2},{a:1,b:3,c:3})
     return actual.value === false && actual.errors.length === 2
   });
 
@@ -311,7 +260,7 @@ var duff = function(oldVal,newVal,options) {
         'Expected target object ["gadgets"]["1"] to not have key "bar".'
       ].sort()
 
-    var actual = duff(originalObject,targetObject,{errors: true})
+    var actual = duff(originalObject,targetObject)
     var doErrorsMatch = actual.errors.sort().every(function(actualError,index) {
       return actualError === expectedErrors[index]
     })
