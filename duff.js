@@ -273,6 +273,40 @@ var duff = function(oldVal,newVal,options) {
     return duff({a:1,b:2},{a:1,b:3,c:3}, {errors: true}).errors.length === 2
   });
 
+  assert('handles nested objects (integration-y)', function() {
+    var originalObject =
+      {
+        widgetIds: ['1','2','3'],
+        gadgets: [
+          { name: 'bar', use: 'gadgeting' },
+          { name: 'baz', use: 'ungadgeting'}
+        ],
+        type: 'foo'
+      }
+
+    var targetObject =
+      {
+        widgetIds: ['1','2','5','4'],
+        gadgets: [
+          { name: 'bar', use: 'gadgetizing' },
+          { name: 'baz', use: 'ungadgeting', bar: [1,2,3] }
+        ]
+      }
+
+    var expectedErrors =
+      [
+        'Expected target object to have key "type". No such key was found.',
+        'Expected target object ["widgetIds"] to not have key "3".',
+        'Expected target object ["widgetIds"]["2"] to equal "3". Instead, it was set to "5".',
+        'Expected target object ["gadgets"]["0"]["use"] to equal "gadgeting". Instead, it was set to "gadgetizing".',
+        'Expected target object ["gadgets"]["1"] to not have key "bar".'
+      ].sort()
+
+    var foo = duff(originalObject,targetObject,{errors: true}).errors.sort().every(function(actualError,index) {
+      return actualError === expectedErrors[index]
+    })
+
+    return foo
   })
 
   console.log(assert.counter + ' tests passed')
