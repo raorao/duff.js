@@ -151,6 +151,9 @@ var duff = function(oldVal,newVal,options) {
      throw( new Error("test failed: " + message) )
     }
   };
+  var xassert = function(message) {
+    console.log('The follow test has been marked as pending: ' + message)
+  }
   var types = [
     0,
     1,
