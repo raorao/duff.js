@@ -16,6 +16,8 @@ var duff = function(oldVal,newVal,options) {
     if(val instanceof Array) { return 'an array' }
     if(_isObject(val)) { return 'an object'}
     if(val === '') { return 'an empty string' }
+    if(typeof val === 'string' ) { return '"' + val + '"'}
+
     return val
   }
 
