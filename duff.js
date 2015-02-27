@@ -35,10 +35,16 @@ var duff = function(oldVal,newVal) {
         return "to equal " + _toString(oldVal) + ". Instead, it was set to " + _toString(newVal) + "."
       break;
       case NO_KEY_ERROR:
-        return "to have key " + _toString(oldVal) + ". No such key was found."
+        var isArray = newVal instanceof Array
+        var key     = isArray ? parseInt(oldVal) : oldVal
+        var qualifier = isArray ? 'index' : 'key'
+        return "to have " + qualifier + " "  + _toString(key) + ". No such " + qualifier + " was found."
       break;
       case TOO_MANY_KEYS_ERROR:
-        return "to not have key " + _toString(newVal) + "."
+        var isArray = oldVal instanceof Array
+        var key     = isArray ? parseInt(newVal) : newVal
+        var qualifier = isArray ? 'index' : 'key'
+        return "to not have " + qualifier + " " + _toString(key) + "."
       break;
     }
   }
@@ -234,7 +240,7 @@ var duff = function(oldVal,newVal) {
     var expectedErrors =
       [
         'Expected target object to have key "type". No such key was found.',
-        'Expected target object ["widgetIds"] to not have key "3".',
+        'Expected target object ["widgetIds"] to not have index 3.',
         'Expected target object ["widgetIds"]["2"] to equal "3". Instead, it was set to "5".',
         'Expected target object ["gadgets"]["0"]["use"] to equal "gadgeting". Instead, it was set to "gadgetizing".',
         'Expected target object ["gadgets"]["1"] to not have key "bar".'
