@@ -302,11 +302,12 @@ var duff = function(oldVal,newVal,options) {
         'Expected target object ["gadgets"]["1"] to not have key "bar".'
       ].sort()
 
-    var foo = duff(originalObject,targetObject,{errors: true}).errors.sort().every(function(actualError,index) {
+    var actual = duff(originalObject,targetObject,{errors: true})
+    var doErrorsMatch = actual.errors.sort().every(function(actualError,index) {
       return actualError === expectedErrors[index]
     })
 
-    return foo
+    return doErrorsMatch && actual.value === false
   })
 
   console.log(assert.counter + ' tests passed')
