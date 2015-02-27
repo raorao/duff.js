@@ -117,9 +117,12 @@ var duff = function(oldVal,newVal,options) {
     if(_isNaN(oldVal)) { return _checkNaN(oldVal,newVal,ancestors) };
 
     if(_isObject(oldVal)) {
-      if( !_checkIsObject(oldVal,newVal,ancestors) || !_checkIfArrays(oldVal,newVal,ancestors) || !_checkObjectKeys(oldVal,newVal,ancestors) ) { return false }
+      if( !_checkIsObject(oldVal,newVal,ancestors) ) { return false }
+      var arrayCheck  = _checkIfArrays(oldVal,newVal,ancestors)
+      var keysCheck   = _checkObjectKeys(oldVal,newVal,ancestors)
+      var valuesCheck = _checkObjectValues(oldVal,newVal,ancestors)
 
-      return _checkObjectValues(oldVal,newVal,ancestors)
+      return (arrayCheck && keysCheck && valuesCheck)
     }
 
     return _checkPrimitiveValues(oldVal,newVal,ancestors)
