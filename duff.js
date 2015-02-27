@@ -238,39 +238,48 @@ var duff = function(oldVal,newVal,options) {
   });
 
   assert('handles nonequivalent strings', function() {
-    return duff('str', 'str1', {errors: true}).errors.length === 1
+    var actual = duff('str', 'str1', {errors: true})
+    return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles nonequivalent integers', function() {
-    return duff(1, 2, {errors: true}).errors.length === 1
+    var actual = duff(1, 2, {errors: true})
+    return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles nonequivalent floats', function() {
-    return duff(1.1, 1.2, {errors: true}).errors.length === 1
+    var actual = duff(1.1, 1.2, {errors: true})
+    return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles a target array with too many keys', function() {
-    return duff([1],[1,2], {errors: true}).errors.length === 1
+    var actual = duff([1],[1,2], {errors: true})
+    return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles a target array with too few keys', function() {
-    return duff([1,2],[1], {errors: true}).errors.length === 1
+    var actual = duff([1,2],[1], {errors: true})
+    return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles a target array with muliple errors', function() {
-    return duff([1,2],[1,3,4], {errors: true}).errors.length === 2
+    var actual = duff([1,2],[1,3,4], {errors: true})
+    return actual.value === false && actual.errors.length === 2
   })
 
   assert('handles a target object with an excess key', function() {
-    return duff({a:1},{a:1,b:2}, {errors: true}).errors.length === 1
+    var actual = duff({a:1},{a:1,b:2}, {errors: true})
+    return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles a target object missing a key', function() {
-    return duff({a:1,b:2},{a:1}, {errors: true}).errors.length === 1
+    var actual = duff({a:1,b:2},{a:1}, {errors: true})
+    return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles a target object with muliple errors', function() {
-    return duff({a:1,b:2},{a:1,b:3,c:3}, {errors: true}).errors.length === 2
+    var actual = duff({a:1,b:2},{a:1,b:3,c:3}, {errors: true})
+    return actual.value === false && actual.errors.length === 2
   });
 
   assert('handles nested objects (integration-y)', function() {
