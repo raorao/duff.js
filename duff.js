@@ -1,5 +1,4 @@
-var duff = function(oldVal,newVal,options) {
-  var _returnErrors = false
+var duff = function(oldVal,newVal) {
   var _errors = []
   var EQUIVALENCY_ERROR = 'equivalencyError'
   var NO_KEY_ERROR = 'noKeyError'
@@ -28,8 +27,6 @@ var duff = function(oldVal,newVal,options) {
     }).join('')
 
     return result === '' ? result : result + " "
-
-
   }
 
   var _createErrorMessage = function(oldVal,newVal,type) {
@@ -52,7 +49,7 @@ var duff = function(oldVal,newVal,options) {
 
   var _check = function(oldVal,newVal,ancestors,type,areEqual) {
     var result = areEqual()
-    if(_returnErrors && !result) { _errors.push( _createError(oldVal,newVal,type,ancestors) ) }
+    if(!result) { _errors.push( _createError(oldVal,newVal,type,ancestors) ) }
     return result
   }
 
@@ -105,12 +102,6 @@ var duff = function(oldVal,newVal,options) {
     return result
   }
 
-  var _setOptions = function(options) {
-    if(!options) { return }
-
-    _returnErrors = options.errors || false
-  }
-
   var _duff = function (oldVal, newVal, ancestors) {
     if(_isNaN(oldVal)) { return _checkNaN(oldVal,newVal,ancestors) };
 
@@ -126,18 +117,7 @@ var duff = function(oldVal,newVal,options) {
     return _checkPrimitiveValues(oldVal,newVal,ancestors)
   };
 
-
-  _constructResult = function() {
-    var result = _duff(oldVal,newVal,[])
-    if (_returnErrors) {
-      return { errors: _errors, value: result}
-    } else {
-      return result
-    }
-  }
-
-  _setOptions(options)
-  return _constructResult();
+  return { errors: _errors, value: _duff(oldVal,newVal,[]) }
 };
 
 
