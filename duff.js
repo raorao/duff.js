@@ -12,8 +12,15 @@ var duff = function(oldVal,newVal,options) {
     return typeof(val) === 'number' && isNaN(val)
   }
 
+  var _toString = function(val) {
+    if(val instanceof Array) { return 'an array' }
+    if(_isObject(val)) { return 'an object'}
+    if(val === '') { return 'an empty string' }
+    return val
+  }
+
   var _createErrorMessage = function(oldVal,newVal) {
-    return "Expected target object to equal " + oldVal + ". Instead, it was set to " + newVal + "."
+    return "Expected target object to equal " + _toString(oldVal) + ". Instead, it was set to " + _toString(newVal) + "."
   }
 
   var _check = function(oldVal,newVal,areEqual) {
@@ -182,14 +189,6 @@ var duff = function(oldVal,newVal,options) {
         var message = "expected duff(" + oldVal + "," + newVal + ") to have value of " + expectedValue + "."
         assert(message,function() { return actual.value === expectedValue })
       })();
-
-      if (oldValIndex !== newValIndex) {
-        var expectedErrorMessage = "Expected target object to equal " + oldVal + ". Instead, it was set to " + newVal + "."
-        var message = "expected duff(" + oldVal + "," + newVal + ") to have error message of " + expectedErrorMessage
-        assert(message,function() { return actual.errors[0] === expectedErrorMessage })
-      };
-
-
     })
   })
 
