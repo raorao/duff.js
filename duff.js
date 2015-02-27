@@ -3,6 +3,9 @@
 var duff = function(oldVal,newVal,options) {
   var _returnErrors = false
   var _errors = []
+  var EQUIVALENCY_ERROR = 'equivalencyError'
+  var NO_KEY_ERROR = 'noKeyError'
+  var TOO_MANY_KEYS_ERROR = 'tooManyKeysError'
 
   var _isObject = function(val) {
     return val && typeof(val) === 'object'
@@ -21,56 +24,84 @@ var duff = function(oldVal,newVal,options) {
     return val
   }
 
-  var _createErrorMessage = function(oldVal,newVal,ancestors) {
-    var ancestorsString = ancestors.map(function(ancestor) {
+  var _createAncestors = function(ancestors) {
+    var result = ancestors.map(function(ancestor) {
       return "[" + _toString(ancestor) + "]"
     }).join('')
-    return "Expected target object " + ancestorsString + " to equal " + _toString(oldVal) + ". Instead, it was set to " + _toString(newVal) + "."
+
+    return result === '' ? result : result + " "
+
+
   }
 
-  var _check = function(oldVal,newVal,ancestors,areEqual) {
+  var _createErrorMessage = function(oldVal,newVal,type) {
+    switch(type) {
+      case EQUIVALENCY_ERROR:
+        return "to equal " + _toString(oldVal) + ". Instead, it was set to " + _toString(newVal) + "."
+      break;
+      case NO_KEY_ERROR:
+        return "to have key " + _toString(oldVal) + ". No such key was found."
+      break;
+      case TOO_MANY_KEYS_ERROR:
+        return "to not have key " + _toString(newVal) + "."
+      break;
+    }
+  }
+
+  var _createError = function(oldVal,newVal,type,ancestors) {
+    return "Expected target object " + _createAncestors(ancestors) + _createErrorMessage(oldVal,newVal,type)
+  }
+
+  var _check = function(oldVal,newVal,ancestors,type,areEqual) {
     var result = areEqual()
-    if(_returnErrors && !result) { _errors.push( _createErrorMessage(oldVal,newVal,ancestors) ) }
+    if(_returnErrors && !result) { _errors.push( _createError(oldVal,newVal,type,ancestors) ) }
     return result
   }
 
   var _checkNaN = function(oldVal,newVal,ancestors) {
-    return _check(oldVal,newVal, ancestors, function() { return _isNaN(newVal) })
+    return _check(oldVal,newVal, ancestors, EQUIVALENCY_ERROR, function() { return _isNaN(newVal) })
   }
 
   var _checkIfArrays = function(oldVal,newVal,ancestors) {
-    return _check(oldVal,newVal, ancestors, function() {
+    return _check(oldVal,newVal, ancestors, EQUIVALENCY_ERROR, function() {
       return (oldVal instanceof Array) === (newVal instanceof Array)
     })
   }
 
   var _checkIsObject = function(oldVal,newVal,ancestors) {
-    return _check(oldVal,newVal,ancestors,function() { return _isObject(newVal) })
+    return _check(oldVal,newVal,ancestors, EQUIVALENCY_ERROR, function() { return _isObject(newVal) })
   }
 
   var _checkPrimitiveValues = function(oldVal,newVal,ancestors) {
-    return _check(oldVal,newVal, ancestors, function() { return oldVal === newVal })
+    return _check(oldVal,newVal, ancestors, EQUIVALENCY_ERROR, function() { return oldVal === newVal })
   }
 
   var _checkObjectKeys = function(oldVal,newVal,ancestors) {
     var oldKeys = Object.keys(oldVal)
     var newKeys = Object.keys(newVal)
-    if(oldKeys.length !== newKeys.length) {
-      return _check(oldVal,newVal,ancestors,function() { return false})
-    }
-    oldKeys.forEach(function(oldKey,index) {
-      if(!_duff(oldKey, newKeys[index],ancestors)) { return false }
+    var result = true
+
+    oldKeys.forEach(function(oldKey) {
+      var localResult = _check(oldKey,newVal,ancestors, NO_KEY_ERROR, function() { return newKeys.indexOf(oldKey) !== -1 })
+      result = result ? localResult : false
     })
 
-    return true
+    newKeys.forEach(function(newKey) {
+      var localResult = _check(oldVal,newKey,ancestors, TOO_MANY_KEYS_ERROR, function() { return oldKeys.indexOf(newKey) !== -1 })
+      result = result ? localResult : false
+    })
+
+    return result
   }
 
   var _checkObjectValues = function(oldObj,newObj,ancestors) {
     var result = true
     for (key in oldObj) {
       var newAncestors = ancestors.concat([key])
-      var localResult = _duff(oldObj[key], newObj[key],newAncestors)
-      result = result ? localResult : false
+      if(newObj[key] !== undefined) {
+        var localResult = _duff(oldObj[key], newObj[key],newAncestors)
+        result = result ? localResult : false
+      }
     }
 
     return result
