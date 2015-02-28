@@ -156,18 +156,16 @@ var duff = function(oldVal,newVal) {
 
   types.forEach(function(oldVal,oldValIndex) {
     types.forEach(function(newVal,newValIndex) {
-      var actual = duff(oldVal,newVal);
-
       (function foo() {
         var expectedCount = oldValIndex === newValIndex ? 0 : 1
         var message = "expected duff(" + oldVal + "," + newVal + ") to have " + expectedCount + " errors."
-        assert(message,function() { return actual.errors.length === expectedCount })
+        assert(message,function() { return duff(oldVal,newVal).errors.length === expectedCount })
       })();
 
       (function foo() {
         var expectedValue = oldValIndex === newValIndex
         var message = "expected duff(" + oldVal + "," + newVal + ") to have value of " + expectedValue + "."
-        assert(message,function() { return actual.value === expectedValue })
+        assert(message,function() { return duff(oldVal,newVal).value === expectedValue })
       })();
     })
   });
