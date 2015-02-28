@@ -1,4 +1,5 @@
-var duff = function(oldVal,newVal) {
+var duff = function(oldVal,newVal,maybeOptions) {
+  var _ignoreOrder = maybeOptions && maybeOptions.ignoreOrder
   var _errors = []
   var EQUIVALENCY_ERROR = 'equivalencyError'
   var NO_KEY_ERROR = 'noKeyError'
@@ -53,6 +54,10 @@ var duff = function(oldVal,newVal) {
     return "Expected target object " + _createAncestors(ancestors) + _createErrorMessage(oldVal,newVal,type)
   }
 
+  var _maybeSort = function(object) {
+    return _ignoreOrder && (object instanceof Array) ? object.sort() : object
+  }
+
   var _check = function(oldVal,newVal,ancestors,type,areEqual) {
     var result = areEqual()
     if(!result) { _errors.push( _createError(oldVal,newVal,type,ancestors) ) }
@@ -97,10 +102,13 @@ var duff = function(oldVal,newVal) {
 
   var _checkObjectValues = function(oldObj,newObj,ancestors) {
     var result = true
-    for (key in oldObj) {
+    var maybeSortedOldObj = _maybeSort(oldObj);
+    var maybeSortedNewObj = _maybeSort(newObj);
+
+    for (key in maybeSortedOldObj) {
       var newAncestors = ancestors.concat([key])
-      if(newObj[key] !== undefined) {
-        var localResult = _duff(oldObj[key], newObj[key],newAncestors)
+      if(maybeSortedNewObj[key] !== undefined) {
+        var localResult = _duff(maybeSortedOldObj[key], maybeSortedNewObj[key],newAncestors)
         result = result ? localResult : false
       }
     }
@@ -213,6 +221,23 @@ var duff = function(oldVal,newVal) {
   assert('handles a target object with muliple errors', function() {
     var actual = duff({a:1,b:2},{a:1,b:3,c:3})
     return actual.value === false && actual.errors.length === 2
+  });
+
+  // handles ignoreOrder option
+
+  assert('with ignoreOrder ignores array order', function() {
+    var actual = duff([1,2],[2,1],{ignoreOrder: true})
+    return actual.value === true && actual.errors.length === 0
+  });
+
+  assert('with ignoreOrder does not ignore array values', function() {
+    var actual = duff([1,2],[3,1],{ignoreOrder: true})
+    return actual.value === false && actual.errors.length === 1
+  });
+
+  assert('has no affect on objects', function() {
+    var actual = duff({a: 1, b: [2,1]},{a: 2, b: [1,2]},{ignoreOrder: true})
+    return actual.value === false && actual.errors.length === 1
   });
 
   assert('handles nested objects (integration-y)', function() {
