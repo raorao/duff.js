@@ -1,10 +1,28 @@
-A JSON diff-ing tool that produces usable messages.
-
+A diff-ing tool that produces usable messages.
 
 Usage
+---------------
+
+```javascript
+  var Duff = require('duff.js')
+  var result = Duff.duff(ORIGNAL_OBJECT,TARGET_OBJECT,OPTIONS)
+  result.errors // array of error messages
+  result.value  // boolean value specifying whether the passed-in objects are deeply equivalent.
+```
+
+Available Options:
+
+* __ignoreOrder__: When set to ```true```, Duff will sort all arrays before comparing them.
+
+Note: Only JSON-compliant objects are supported. Objects with circular references, custom objects, or functions will not necessary work with Duff.
+
+
+Example
 ------------
 
 ```javascript
+  var duff = require('duff.js').duff
+
   var oldObj =
     {
       widgetIds: ['1','2','3'],
@@ -24,11 +42,11 @@ Usage
       ]
     }
 
-  check = duff(oldObj,newObj)
+  var result = duff(oldObj,newObj)
 
-  check.value // false
+  result.value // false
 
-  check.errors
+  result.errors
     // [
     //   'Expected target object to have key "type". No such key was found.',
     //   'Expected target object ["widgetIds"] to not have index 3.',
@@ -37,5 +55,3 @@ Usage
     //   'Expected target object ["gadgets"]["1"] to not have key "bar".'
     // ]
 ```
-
-```duff``` also supports an third argument options. A key of ```ignoreOrder``` set to ```false``` will ignore array element ordering.

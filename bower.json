@@ -1,0 +1,18 @@
+{
+  "name": "duff.js",
+  "main": "duff.js",
+  "version": "0.1.0",
+  "homepage": "https://github.com/raorao/duff.js",
+  "authors": [
+    "raorao <savinirs@gmail.com>"
+  ],
+  "description": "A simple JavaSript diff-ing tool that produces usable messages.",
+  "moduleType": [
+    "amd"
+  ],
+  "keywords": [
+    "JavaScript"
+  ],
+  "ignore": ["spec.js"],
+  "license": "MIT"
+}
